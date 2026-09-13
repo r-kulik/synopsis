@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="618" height="36" viewBox="0 0 618 36" role="img" aria-labelledby="title">
+  <title id="title">Python 3.11+, JavaScript, Markdown и LaTeX, MIT</title>
+  <g font-family="Segoe UI,Arial,sans-serif" font-size="13" text-anchor="middle">
+    <rect width="152" height="36" rx="8" fill="#eaf1f8"/>
+    <rect x="10" y="8" width="25" height="20" rx="5" fill="#3776ab"/>
+    <text x="23" y="23" fill="white" font-size="12" font-weight="bold">Py</text>
+    <text x="93" y="23" fill="#305c7e">Python 3.11+</text>
+    <rect x="162" width="140" height="36" rx="8" fill="#fbf5d9"/>
+    <rect x="172" y="8" width="23" height="21" rx="3" fill="#f2d550"/>
+    <text x="184" y="24" fill="#383220" font-size="12" font-weight="bold">JS</text>
+    <text x="246" y="23" fill="#6c5b25">JavaScript</text>
+    <rect x="312" width="202" height="36" rx="8" fill="#efebf7"/>
+    <text x="334" y="24" fill="#6154bb" font-family="Georgia,serif" font-size="24">∑</text>
+    <text x="430" y="23" fill="#6154bb">Markdown + LaTeX</text>
+    <rect x="524" width="94" height="36" rx="8" fill="#eaf2eb"/>
+    <path d="m537 18 4 4 7-9" stroke="#4d7954" stroke-width="2" fill="none"/>
+    <text x="581" y="23" fill="#4d7954">MIT</text>
+  </g>
+</svg>

@@ -1,9 +1,9 @@
 """Loopback HTTP API and static HTML/JS/CSS for the Synopsis workspace."""
 from __future__ import annotations
-import argparse
 import json
 import mimetypes
 import os
+import socket
 from uuid import uuid4
 from dataclasses import asdict, is_dataclass
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
@@ -18,6 +18,16 @@ from .frontend_assets import frontend_status, require_frontend
 
 FRONTEND = Path(__file__).resolve().parent.parent / "frontend"
 MAX_BODY = 300 * 1024 * 1024
+
+
+class LocalHTTPServer(ThreadingHTTPServer):
+    # Windows SO_REUSEADDR can allow another process to bind this same port.
+    allow_reuse_address = os.name != "nt"
+
+    def server_bind(self):
+        if os.name == "nt":
+            self.socket.setsockopt(socket.SOL_SOCKET, socket.SO_EXCLUSIVEADDRUSE, 1)
+        super().server_bind()
 
 
 def serial(value):
@@ -143,24 +153,20 @@ def create_server(data_dir, host="127.0.0.1", port=8765):
             except (StorageError,ValueError,KeyError,TypeError,IndexError,DomainError) as e:
                 self.reply(400,{"error":str(e),"code":str(getattr(e,"code",""))})
 
-    httpd=ThreadingHTTPServer((host,port),Handler)
+    httpd=LocalHTTPServer((host,port),Handler)
     httpd.application=app
     httpd.instance_id=uuid4().hex
     httpd.startup_ui=startup_ui
     return httpd
 
 
-def serve(data_dir,host="127.0.0.1",port=8765):
-    with create_server(data_dir,host,port) as httpd:
-        print(f"Synopsis: http://{host}:{httpd.server_port}  data: {Path(data_dir).resolve()}",flush=True)
-        print(f"UI: {httpd.startup_ui['root']}  build: {httpd.startup_ui['fingerprint']}  instance: {httpd.instance_id}",flush=True)
-        try: httpd.serve_forever()
-        except KeyboardInterrupt: pass
+def serve(data_dir,host="127.0.0.1",port=8765,*,open_browser=True):
+    if host != "127.0.0.1":
+        raise ValueError("Synopsis запускается только на 127.0.0.1")
+    from .launcher import launch
+    return launch(data_dir,port,browser=open_browser)
 
 
 if __name__=="__main__":
-    q=argparse.ArgumentParser()
-    q.add_argument("--data-dir",default=".synopsis-data")
-    q.add_argument("--port",type=int,default=8765)
-    a=q.parse_args()
-    serve(a.data_dir,port=a.port)
+    from .launcher import main
+    raise SystemExit(main())

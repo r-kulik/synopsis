@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="900" height="240" viewBox="0 0 900 240" role="img" aria-labelledby="title desc">
+  <title id="title">Synopsis</title>
+  <desc id="desc">Конспекты, связанные в целую картину. Логотип локального пространства знаний.</desc>
+  <defs>
+    <linearGradient id="ink" x2="1" y2="1"><stop stop-color="#6b5fd1"/><stop offset="1" stop-color="#48429e"/></linearGradient>
+  </defs>
+  <rect width="900" height="240" rx="28" fill="#faf8f4"/>
+  <rect x="54" y="54" width="120" height="120" rx="32" fill="url(#ink)"/>
+  <text x="113" y="145" text-anchor="middle" fill="white" font-family="Georgia,serif" font-style="italic" font-weight="bold" font-size="104">s</text>
+  <text x="202" y="120" fill="#29263e" font-family="Segoe UI,Arial,sans-serif" font-size="64" font-weight="750" letter-spacing="-3">synopsis<tspan fill="#6154bb">.</tspan></text>
+  <text x="207" y="157" fill="#746a83" font-family="Segoe UI,Arial,sans-serif" font-size="17">Конспекты, связанные в целую картину.</text>
+  <g fill="none" stroke="#c8bcdf" stroke-width="2">
+    <path d="M658 96L728 60L799 125L721 176L658 96"/>
+    <path d="M658 96L799 125M728 60L721 176"/>
+  </g>
+  <rect x="630" y="75" width="57" height="42" rx="11" fill="#eee8f8" stroke="#c3b5df"/>
+  <rect x="701" y="40" width="57" height="42" rx="11" fill="#eee8f8" stroke="#c3b5df"/>
+  <rect x="771" y="104" width="57" height="42" rx="11" fill="#f5eadb" stroke="#dcc2a0"/>
+  <rect x="693" y="155" width="57" height="42" rx="11" fill="#edf0e2" stroke="#c6cfad"/>
+  <g stroke="#aa9abc" stroke-width="3" stroke-linecap="round">
+    <path d="M644 90h26m-26 10h18M715 55h26m-26 10h18M785 120h26m-26 10h18M707 170h26m-26 10h18"/>
+  </g>
+</svg>

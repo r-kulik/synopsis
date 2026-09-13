@@ -12,7 +12,7 @@ await mkdir(root, { recursive: true });
 await mkdir(shots, { recursive: true });
 const server = spawn(
   "python",
-  ["-m", "server.http_server", "--data-dir", root, "--port", "0"],
+  ["-m", "server.http_server", "--data-dir", root, "--port", "0", "--no-browser"],
   { stdio: ["ignore", "pipe", "pipe"] },
 );
 const [out] = await once(server.stdout, "data");
@@ -491,7 +491,7 @@ try {
   await mkdir(importRoot, { recursive: true });
   const importServer = spawn(
     "python",
-    ["-m", "server.http_server", "--data-dir", importRoot, "--port", "0"],
+    ["-m", "server.http_server", "--data-dir", importRoot, "--port", "0", "--no-browser"],
     { stdio: ["ignore", "pipe", "pipe"] },
   );
   try {

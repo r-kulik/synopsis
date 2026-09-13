@@ -7,7 +7,7 @@ from urllib.request import Request, urlopen
 class HttpIntegrationTests(unittest.TestCase):
  def setUp(self):
   self.root=Path.cwd() / ("_s07_http_"+uuid.uuid4().hex);self.root.mkdir();sock=socket.socket();sock.bind(("127.0.0.1",0));self.port=sock.getsockname()[1];sock.close()
-  self.p=subprocess.Popen([sys.executable,"-m","server.http_server","--data-dir",str(self.root),"--port",str(self.port)],stdout=subprocess.DEVNULL,stderr=subprocess.PIPE)
+  self.p=subprocess.Popen([sys.executable,"-m","server.http_server","--data-dir",str(self.root),"--port",str(self.port),"--no-browser"],stdout=subprocess.DEVNULL,stderr=subprocess.PIPE)
   for _ in range(30):
    try:urlopen(f"http://127.0.0.1:{self.port}/",timeout=.2);break
    except Exception:time.sleep(.05)

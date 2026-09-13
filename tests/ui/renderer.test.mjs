@@ -11,7 +11,7 @@ test("local Chrome: real Markdown, math, safe links and UTF-16 selection", async
   await mkdir(root, { recursive: true });
   const server = spawn(
     "python",
-    ["-m", "server.http_server", "--data-dir", root, "--port", "0"],
+    ["-m", "server.http_server", "--data-dir", root, "--port", "0", "--no-browser"],
     { stdio: ["ignore", "pipe", "pipe"] },
   );
   const [chunk] = await once(server.stdout, "data");
