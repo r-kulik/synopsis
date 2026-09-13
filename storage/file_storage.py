@@ -4,6 +4,7 @@ from __future__ import annotations
 import hashlib
 import json
 import os
+import re
 import tempfile
 from dataclasses import asdict
 from pathlib import Path
@@ -53,7 +54,14 @@ class FileCourseStorage:
         self.root = Path(root); self.courses = self.root / "courses"; self.assets = self.root / "assets"
         self.courses.mkdir(parents=True, exist_ok=True); self.assets.mkdir(parents=True, exist_ok=True)
 
-    def _course_path(self, course_id: str) -> Path: return self.courses / f"{course_id}.json"
+    @staticmethod
+    def _safe_id(value: str) -> str:
+        if not isinstance(value, str) or not re.fullmatch(r"[A-Za-z0-9_-]{1,128}", value):
+            raise StorageError("invalid entity id")
+        return value
+
+    def _course_path(self, course_id: str) -> Path:
+        return self.courses / f"{self._safe_id(course_id)}.json"
     def list_courses(self) -> list[Course]:
         result = []
         for path in self.courses.glob("*.json"):
@@ -78,6 +86,7 @@ class FileCourseStorage:
                 try: os.unlink(temp)
                 except OSError: pass
     def put_asset(self, course_id: str, asset_id: str, original_name: str, media_type: str, content: bytes) -> Asset:
+        self._safe_id(asset_id)
         self.load(course_id)  # course must exist before any file is accepted
         folder = self.assets / course_id; folder.mkdir(exist_ok=True)
         target = folder / asset_id; fd, temp = tempfile.mkstemp(prefix=asset_id + ".", suffix=".tmp", dir=folder)
@@ -87,8 +96,12 @@ class FileCourseStorage:
         except OSError as exc: raise StorageWriteError("could not persist asset") from exc
         return Asset(AssetId(asset_id), CourseId(course_id), media_type, asset_id, original_name, len(content), hashlib.sha256(content).hexdigest())
     def get_asset(self, course_id: str, asset_id: str) -> tuple[Asset, bytes]:
+        self._safe_id(asset_id)
         snapshot = self.load(course_id)
         asset = snapshot.assets.get(AssetId(asset_id))
         if asset is None or asset.course_id != CourseId(course_id): raise StorageError("asset does not exist in this course")
-        try: return asset, (self.assets / course_id / asset.relative_path).read_bytes()
+        folder = (self.assets / course_id).resolve()
+        target = (folder / asset.relative_path).resolve()
+        if not target.is_relative_to(folder): raise StorageError("invalid asset path")
+        try: return asset, target.read_bytes()
         except OSError as exc: raise StorageError("asset bytes are unavailable") from exc

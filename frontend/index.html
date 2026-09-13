@@ -1,0 +1,114 @@
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <meta name="theme-color" content="#f6f5f0" />
+    <title>Synopsis — мои курсы</title>
+    <link rel="icon" href="/static/favicon.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="/static/styles.css" />
+    <script src="/static/bootstrap.js"></script>
+    <script type="module" src="/static/home.js"></script>
+  </head>
+  <body class="home-page">
+    <aside class="home-sidebar">
+      <a class="brand" href="/" aria-label="Synopsis — главная"
+        ><span class="brand-mark">s</span
+        ><span>synopsis<span class="brand-dot">.</span></span></a
+      >
+      <div class="sidebar-section-label">ЛИЧНОЕ ПРОСТРАНСТВО</div>
+      <a class="nav-item selected" href="/" data-icon="library"
+        >Мои курсы <span id="sidebar-count" class="nav-count">0</span></a
+      >
+      <button class="nav-item" id="sidebar-import" data-icon="upload">
+        Импорт курса
+      </button>
+      <div class="sidebar-bottom">
+        <span class="local-dot"></span>
+        <div>
+          <strong>Всё остаётся у вас</strong>
+          <p>Локальное пространство знаний</p>
+        </div>
+      </div>
+    </aside>
+    <main class="home-main">
+      <header class="home-topbar">
+        <span class="breadcrumb">Библиотека <span>/</span> Мои курсы</span
+        ><span class="local-badge"
+          ><span class="local-dot"></span> На этом компьютере</span
+        >
+      </header>
+      <section class="home-content">
+        <div class="home-intro">
+          <div>
+            <div class="eyebrow">СВЯЗЫВАЙТЕ. ПОНИМАЙТЕ. ЗАПОМИНАЙТЕ.</div>
+            <h1>Знания обретают форму<span>.</span></h1>
+            <p>
+              Соберите лекции, понятия и ваши открытия<br
+                class="desktop-only"
+              />
+              в единую картину — по одному курсу за раз.
+            </p>
+          </div>
+          <div class="hero-art" aria-hidden="true">
+            <svg viewBox="0 0 320 200">
+              <path
+                d="M57 92 C112 92 94 40 153 45 M153 45 C210 45 202 128 260 128 M57 92 C126 90 112 161 174 156 M174 156 Q226 159 260 128"
+              />
+              <circle cx="153" cy="45" r="6" />
+              <circle cx="174" cy="156" r="5" />
+              <rect x="10" y="62" width="99" height="61" rx="11" />
+              <rect x="111" y="20" width="90" height="54" rx="10" />
+              <rect x="127" y="130" width="94" height="54" rx="10" />
+              <rect x="223" y="101" width="87" height="58" rx="10" />
+              <path
+                class="art-line"
+                d="M26 80h35m-35 11h64m-64 10h45M127 36h30m-30 11h57m-41 100h30m-30 11h56M239 118h25m-25 11h53m-53 10h36"
+              /></svg
+            ><span class="art-label">От заметки — к пониманию</span>
+          </div>
+        </div>
+        <div class="section-heading">
+          <div>
+            <h2>
+              Мои курсы <span id="course-count" class="count-pill">0</span>
+            </h2>
+            <p>Каждый курс — отдельная история вашего обучения.</p>
+          </div>
+          <div class="actions">
+            <button
+              class="button secondary"
+              id="import-course"
+              data-icon="upload"
+            >
+              Импортировать</button
+            ><button class="button primary" id="create-course" data-icon="plus">
+              Новый курс
+            </button>
+          </div>
+        </div>
+        <div id="home-error" class="alert error hidden" role="alert"></div>
+        <div id="course-grid" class="course-grid" aria-live="polite">
+          <div class="skeleton course-skeleton"></div>
+          <div class="skeleton course-skeleton"></div>
+          <div class="skeleton course-skeleton"></div>
+        </div>
+        <div class="home-footnote">
+          <span data-icon="archive"></span>
+          <p>
+            Курс можно взять с собой. Экспортируйте один файл
+            <strong>.synopsis</strong> — вместе с конспектами, картой и
+            вложениями.
+          </p>
+        </div>
+      </section>
+    </main>
+    <input id="import-input" type="file" accept=".synopsis" hidden />
+    <div id="toast-region" class="toast-region" aria-live="polite"></div>
+    <noscript
+      ><div class="noscript">
+        Для работы Synopsis включите JavaScript в браузере.
+      </div></noscript
+    >
+  </body>
+</html>

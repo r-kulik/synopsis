@@ -115,7 +115,12 @@ class CourseService:
             cards = {id for id, x in self.state.cards.items() if x.note_id == note_id}
             self.state.cards = {id:x for id,x in self.state.cards.items() if id not in cards}
             self.state.edges = {id:x for id,x in self.state.edges.items() if x.source_card_id not in cards and x.target_card_id not in cards}
+            removed_boxes = {id for id,x in self.state.lecture_boxes.items() if x.note_id == note_id}
+            for card in self.state.cards.values():
+                if card.lecture_box_id in removed_boxes:
+                    card.lecture_box_id = None
             self.state.lecture_boxes = {id:x for id,x in self.state.lecture_boxes.items() if x.note_id != note_id}
+            self.state.lecture_source_attachments = [a for a in self.state.lecture_source_attachments if a.lecture_note_id != note_id]
             self.state.facts = {id:x for id,x in self.state.facts.items() if x.owner_note_id != note_id}
             for note in self.state.notes.values():
                 if note.defined_in_lecture_note_id == note_id: note.defined_in_lecture_note_id = None

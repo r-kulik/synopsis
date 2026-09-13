@@ -1,2 +1,44 @@
-# synopsis
-Creation, storing and displaying interactive abstracts of Knowledge
+# Synopsis
+
+Локальное пространство для учебных курсов: Markdown-конспекты, формулы,
+карта понятий, комментарии и PDF-источники.
+
+Запуск из каталога проекта (Python 3.11+; проверяется на Python 3.14):
+
+```powershell
+python -m server.http_server --data-dir .synopsis-data --port 8765
+```
+
+Откройте [Synopsis](http://127.0.0.1:8765/). На главной нажмите «Новый курс».
+Если сервер был запущен до обновления кода, остановите его `Ctrl+C` и повторите
+команду, затем обновите страницу `Ctrl+F5`.
+
+Готовые файлы интерфейса включены в проект: для обычного запуска Node.js и
+интернет не нужны. Данные остаются в `.synopsis-data`; сохраните этот каталог.
+Инструкция: [.docs/QA-USER-GUIDE.md](.docs/QA-USER-GUIDE.md).
+
+Для разработки UI нужен Node.js 22+:
+
+```powershell
+npm ci
+npm run build
+npm run test:ui
+npm run test:browser
+```
+
+`frontend/*.html`, `frontend/*.js`, `frontend/styles.css` — страницы и UI.
+`tools/markdown-entry.js` — исходник bundle CodeMirror/remark/KaTeX. После
+изменения bundle пересоберите его; остальные UI-файлы сервер читает с диска.
+`npm run test:browser` использует установленный Chrome и отдельное тестовое
+хранилище. Браузерные снимки появляются в `test-results/ui/`.
+
+Проверка **уже запущенного** экземпляра (без создания тестовых курсов и записей):
+
+```powershell
+npm run check:running -- --url http://localhost:8765
+```
+
+Она проверяет выдачу файлов UI, совпадение с текущим проектом и открытие формы
+конспекта в существующем курсе, но намеренно не отправляет форму. Диагностика
+процесса, каталога UI и data-dir доступна по `/api/health`. При отсутствии
+обязательных файлов UI новый сервер отказывается запускаться с явной ошибкой.

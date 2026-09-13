@@ -9,6 +9,7 @@ import re
 import shutil
 import uuid
 import zipfile
+from math import isfinite
 from dataclasses import asdict, dataclass
 from pathlib import Path, PurePosixPath
 from typing import Callable
@@ -91,9 +92,12 @@ def _asset_path(asset: Asset) -> str:
 def _external_diagnostics(snapshot: CourseSnapshot) -> list[ArchiveDiagnostic]:
     result = []
     for owner, markdown in [(f"notes/{n.id}.md", n.markdown) for n in snapshot.notes.values()] + [(f"facts/{f.id}.md", f.markdown) for f in snapshot.facts.values()]:
-        for ref in _EXTERNAL.findall(markdown):
+        definitions = {m.group(1).casefold(): m.group(2) for m in re.finditer(r'(?m)^ {0,3}\[([^]]+)\]:\s*(\S+)', markdown)}
+        refs = _EXTERNAL.findall(markdown)
+        refs += [definitions.get((label or alt).casefold(), "") for alt,label in re.findall(r'!\[([^]]*)\]\[([^]]*)\]', markdown)]
+        for ref in refs:
             ref = ref.strip().strip("<>")
-            if re.match(r"(?:https?://|file:|[A-Za-z]:[\\/]|/)", ref):
+            if ref and not ref.startswith("synopsis://asset/"):
                 result.append(ArchiveDiagnostic("externalDependency", "external image/local path is not bundled; add it as a course asset first", owner))
     return result
 
@@ -142,17 +146,22 @@ def _read_zip(content: bytes, limits: ArchiveLimits) -> dict[str, bytes]:
                 result[info.filename] = z.read(info)
             return result
     except ArchiveError: raise
-    except (zipfile.BadZipFile, OSError) as exc: raise ArchiveError("unsafeArchive", "archive is not a readable ZIP") from exc
+    except (zipfile.BadZipFile, OSError, RuntimeError) as exc: raise ArchiveError("unsafeArchive", "archive is not a readable ZIP") from exc
 
 
 def _json(files: dict[str, bytes], path: str) -> dict:
-    try: return json.loads(files[path])
-    except (KeyError, UnicodeDecodeError, json.JSONDecodeError, TypeError) as exc: raise ArchiveError("invalidStructure", "required JSON is missing or invalid", path) from exc
+    try:
+        value=json.loads(files[path])
+        if not isinstance(value,dict): raise ValueError("expected an object")
+        return value
+    except (KeyError, UnicodeDecodeError, ValueError, TypeError) as exc: raise ArchiveError("invalidStructure", "required JSON is missing or invalid", path) from exc
 
 
 def _unique(rows: list[dict], key: str, label: str) -> None:
+    if any(not isinstance(x,dict) for x in rows): _error("invalidStructure", f"invalid {label} record")
     values = [x.get(key) for x in rows]
     if any(not isinstance(v, str) or not v for v in values) or len(values) != len(set(values)): _error("invalidStructure", f"duplicate or invalid {label} IDs")
+    if key == "id" and any(not re.fullmatch(r"[A-Za-z0-9_-]{1,128}",v) for v in values): _error("invalidStructure", f"unsafe {label} ID")
 
 
 def _snapshot(files: dict[str, bytes]) -> CourseSnapshot:
@@ -193,8 +202,21 @@ def _snapshot(files: dict[str, bytes]) -> CourseSnapshot:
 def _structure(s: CourseSnapshot, data: dict, files: dict[str, bytes]) -> None:
     cid=s.course.id
     groups=(s.notes,s.cards,s.lecture_boxes,s.edges,s.facts,s.sources,s.assets)
+    if not isinstance(s.course.title,str) or not isinstance(s.course.settings,dict): _error("invalidStructure", "invalid course fields")
+    map_settings=s.course.settings.get("map",{})
+    if not isinstance(map_settings,dict) or not isinstance(map_settings.get("hiddenNoteKinds",[]),list) or not isinstance(map_settings.get("cardStyles",{}),dict) or not isinstance(map_settings.get("edgeStyles",{}),dict): _error("invalidStructure", "invalid map settings")
+    if len({c.note_id for c in s.cards.values()}) != len(s.cards) or len({b.note_id for b in s.lecture_boxes.values()}) != len(s.lecture_boxes): _error("invalidStructure", "duplicate representation of a note")
+    for n in s.notes.values():
+        if not isinstance(n.title,str) or not isinstance(n.summary,str) or type(n.revision) is not int or n.revision < 0: _error("invalidStructure", "invalid note fields")
+        if n.defined_in_lecture_note_id and (n.kind != NoteKind.CONCEPT or s.notes.get(n.defined_in_lecture_note_id) is None or s.notes[n.defined_in_lecture_note_id].kind != NoteKind.LECTURE): _error("invalidStructure", "definition target must be a lecture")
+    for obj in [*s.cards.values(),*s.lecture_boxes.values()]:
+        if any(type(v) not in (float,int) or not isfinite(v) or abs(v)>1e7 for v in (obj.position.x,obj.position.y,obj.size.x,obj.size.y)) or min(obj.size.x,obj.size.y)<=0: _error("invalidStructure", "invalid map geometry")
+    for edge in s.edges.values():
+        if edge.label is not None and not isinstance(edge.label,str): _error("invalidStructure", "invalid edge label")
+        if edge.geometry.routing != "polyline" or any(type(v) not in (float,int) or not isfinite(v) for p in edge.geometry.control_points for v in (p.u,p.v)): _error("invalidStructure", "invalid edge geometry")
     if any(x.course_id != cid for group in groups for x in group.values()): _error("courseMismatch", "entity belongs to a different course")
     if any(card.note_id not in s.notes or (card.lecture_box_id and card.lecture_box_id not in s.lecture_boxes) for card in s.cards.values()): _error("invalidStructure", "card reference is missing")
+    if any(s.notes[c.note_id].kind==NoteKind.LECTURE for c in s.cards.values()): _error("invalidStructure", "lecture requires a box, not an ordinary card")
     if any(box.note_id not in s.notes for box in s.lecture_boxes.values()) or any(box.note_id not in s.notes or s.notes[box.note_id].kind != NoteKind.LECTURE for box in s.lecture_boxes.values()): _error("invalidStructure", "lecture box must own a lecture note")
     if any(n.defined_in_lecture_note_id and n.defined_in_lecture_note_id not in s.notes for n in s.notes.values()): _error("invalidStructure", "definition lecture is missing")
     if any(f.owner_note_id not in s.notes for f in s.facts.values()): _error("invalidStructure", "fact owner is missing")
@@ -204,6 +226,8 @@ def _structure(s: CourseSnapshot, data: dict, files: dict[str, bytes]) -> None:
         target = s.notes[s.cards[edge.target_card_id].note_id].kind
         if (source, target) != EDGE_ENDPOINTS[edge.kind]: _error("invalidEdge", "edge endpoints do not match edge kind")
     if any(src.asset_id not in s.assets for src in s.sources.values()): _error("invalidStructure", "source asset is missing")
+    for source in s.sources.values():
+        if s.assets[source.asset_id].media_type != "application/pdf" or (source.page_count is not None and (type(source.page_count) is not int or source.page_count<1)): _error("invalidStructure", "invalid PDF source")
     for attachment in s.lecture_source_attachments:
         if attachment.lecture_note_id not in s.notes or attachment.source_id not in s.sources: _error("invalidStructure", "source reference is missing")
         if s.notes[attachment.lecture_note_id].kind != NoteKind.LECTURE: _error("invalidStructure", "source must attach to a lecture")
@@ -211,6 +235,8 @@ def _structure(s: CourseSnapshot, data: dict, files: dict[str, bytes]) -> None:
         if attachment.page is not None and (not isinstance(attachment.page, int) or attachment.page < 1 or (pages is not None and attachment.page > pages)): _error("invalidStructure", "source page is invalid")
     asset_rows={x["id"]:x for x in data["assets"]}
     for aid, asset in s.assets.items():
+        if asset.relative_path != asset.id: _error("unsafeArchive", "asset storage path must be its stable ID")
+        if asset.media_type not in {"application/pdf","image/png","image/jpeg","image/gif","image/webp","image/avif"}: _error("invalidStructure", "unsupported attachment media type")
         path=asset_rows[str(aid)].get("archive_path")
         if path != _asset_path(asset) or path not in files or len(files[path]) != asset.byte_length or (asset.sha256 and _sha(files[path]) != asset.sha256): _error("invalidStructure", "asset bytes are missing or invalid", str(path))
 

@@ -1,0 +1,286 @@
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <meta name="theme-color" content="#f6f5f0" />
+    <title>Курс — Synopsis</title>
+    <link rel="icon" href="/static/favicon.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="/static/styles.css" />
+    <link rel="stylesheet" href="/static/vendor/katex/katex.min.css" />
+    <script src="/static/bootstrap.js"></script>
+    <script type="module" src="/static/course.js"></script>
+  </head>
+  <body class="workspace-page">
+    <aside class="course-sidebar" id="course-sidebar">
+      <a class="brand" href="/" aria-label="Synopsis — все курсы"
+        ><span class="brand-mark">s</span
+        ><span>synopsis<span class="brand-dot">.</span></span></a
+      >
+      <a class="back-link" href="/" data-icon="arrowLeft">Все курсы</a>
+      <div class="course-identity">
+        <span class="course-glyph" data-icon="book"></span>
+        <h1 id="sidebar-course-title">Загрузка курса…</h1>
+        <button
+          class="icon-button"
+          id="rename-course"
+          title="Переименовать курс"
+          aria-label="Переименовать курс"
+          data-icon="edit"
+        ></button>
+      </div>
+      <div class="catalog-tabs">
+        <button class="active" data-catalog="notes" data-icon="library">
+          Конспекты</button
+        ><button data-catalog="sources" data-icon="paperclip">Источники</button>
+      </div>
+      <section id="notes-catalog">
+        <label class="search-field"
+          ><span data-icon="search"></span
+          ><input
+            id="note-search"
+            type="search"
+            placeholder="Найти конспект…"
+            aria-label="Поиск конспектов"
+          /><kbd>/</kbd></label
+        >
+        <div class="catalog-filter-row">
+          <select id="note-kind-filter" aria-label="Тип конспекта">
+            <option value="">Все типы</option>
+            <option value="lecture">Лекции</option>
+            <option value="concept">Понятия</option>
+            <option value="externalConcept">Внешние понятия</option>
+            <option value="example">Примеры</option>
+            <option value="task">Задачи</option></select
+          ><label
+            class="compact-check"
+            title="Показать только конспекты без карточки"
+            ><input id="cardless-filter" type="checkbox" />Без карточки</label
+          >
+        </div>
+        <div class="catalog-heading">
+          <span>КОНСПЕКТЫ <b id="notes-count">0</b></span
+          ><button
+            id="catalog-add"
+            disabled
+            data-startup-control
+            class="icon-button"
+            title="Создать конспект"
+            aria-label="Создать конспект"
+            data-icon="plus"
+          ></button>
+        </div>
+        <div id="notes-list" class="notes-list"></div>
+      </section>
+      <section id="sources-catalog" class="hidden">
+        <p class="catalog-description">
+          PDF курса. Открываются в отдельной вкладке и сохраняются вместе с
+          курсом.
+        </p>
+        <button
+          id="upload-source"
+          class="button secondary full-width"
+          data-icon="upload"
+        >
+          Добавить PDF
+        </button>
+        <div id="sources-list" class="sources-list"></div>
+      </section>
+      <div class="course-sidebar-bottom">
+        <button id="export-course" class="nav-item" data-icon="download">
+          Экспортировать курс</button
+        ><span class="local-caption"
+          ><span class="local-dot"></span> Хранится на этом компьютере</span
+        >
+      </div>
+    </aside>
+    <main class="course-main">
+      <header class="workspace-topbar">
+        <div class="workspace-breadcrumb">
+          <button
+            id="toggle-sidebar"
+            class="icon-button"
+            title="Список конспектов"
+            aria-label="Список конспектов"
+            data-icon="panel"
+          ></button
+          ><span id="topbar-course-title">Курс</span
+          ><span class="breadcrumb-slash">/</span
+          ><span class="muted">Рабочее пространство</span>
+        </div>
+        <div class="actions">
+          <span id="save-state" class="save-state"
+            ><span class="local-dot"></span> Загрузка курса…</span
+          ><button
+            id="new-note"
+            class="button primary small"
+            data-icon="plus"
+            disabled
+            data-startup-control
+          >
+            Создать
+          </button>
+        </div>
+      </header>
+      <div id="course-error" class="alert error hidden" role="alert"></div>
+      <div class="workspace" id="workspace">
+        <section class="map-panel" aria-label="Карта курса">
+          <div class="panel-header">
+            <div>
+              <span class="panel-kicker">ОБЩАЯ КАРТИНА</span>
+              <h2>
+                Карта курса <span id="map-count" class="count-pill">0</span>
+              </h2>
+            </div>
+            <div class="actions">
+              <button
+                id="new-edge"
+                class="icon-button"
+                title="Создать связь"
+                aria-label="Создать связь"
+                data-icon="link"
+              ></button
+              ><button
+                id="map-settings"
+                class="icon-button"
+                title="Оформление и видимость"
+                aria-label="Оформление и видимость"
+                data-icon="sliders"
+              ></button>
+            </div>
+          </div>
+          <div class="map-canvas" id="map-canvas">
+            <svg
+              id="course-map"
+              aria-label="Интерактивная карта курса"
+              tabindex="0"
+            ></svg>
+            <div id="map-empty" class="map-empty hidden">
+              <div class="empty-mini-icon" data-icon="network"></div>
+              <h3>Большие идеи начинаются<br />с первого понятия</h3>
+              <p>
+                Создайте лекцию или конспект.<br />Связывайте карточки, чтобы
+                увидеть целое.
+              </p>
+              <button
+                id="map-first-note"
+                disabled
+                data-startup-control
+                class="button secondary"
+                data-icon="plus"
+              >
+                Добавить на карту
+              </button>
+            </div>
+            <div class="map-bottom">
+              <span class="map-help"
+                >Перетаскивайте карту · Колесо — масштаб</span
+              >
+              <div class="map-controls">
+                <button
+                  id="zoom-out"
+                  class="icon-button"
+                  aria-label="Уменьшить масштаб"
+                  title="Уменьшить"
+                  data-icon="minus"
+                ></button
+                ><span id="zoom-value">100%</span
+                ><button
+                  id="zoom-in"
+                  class="icon-button"
+                  aria-label="Увеличить масштаб"
+                  title="Увеличить"
+                  data-icon="plus"
+                ></button
+                ><span class="control-divider"></span
+                ><button
+                  id="zoom-fit"
+                  class="icon-button"
+                  aria-label="Вся карта"
+                  title="Вся карта"
+                  data-icon="maximize"
+                ></button>
+              </div>
+            </div>
+            <div id="edge-inspector" class="edge-inspector hidden"></div>
+          </div>
+          <div class="map-legend">
+            <span><i class="kind-dot concept"></i>Понятие</span
+            ><span><i class="kind-dot externalConcept"></i>Внешнее</span
+            ><span><i class="kind-dot example"></i>Пример</span
+            ><span><i class="kind-dot task"></i>Задача</span>
+          </div>
+        </section>
+        <div
+          id="panel-splitter"
+          class="panel-splitter"
+          role="separator"
+          aria-label="Изменить ширину карты и конспекта"
+          aria-orientation="vertical"
+          aria-valuemin="25"
+          aria-valuemax="75"
+          aria-valuenow="53"
+          tabindex="0"
+        >
+          <span></span>
+        </div>
+        <section
+          class="editor-panel"
+          id="editor-panel"
+          aria-label="Панель конспектов"
+        >
+          <div id="note-tabs" class="note-tabs" role="tablist"></div>
+          <div id="editor-empty" class="editor-empty">
+            <div class="reading-illustration" aria-hidden="true">
+              <span></span><span></span><span></span><i></i>
+            </div>
+            <span class="eyebrow">МЕСТО ДЛЯ ВАШИХ МЫСЛЕЙ</span>
+            <h2>Каждой идее —<br />свой конспект.</h2>
+            <p>
+              Откройте карточку на карте или выберите<br />конспект в списке
+              слева.
+            </p>
+            <button
+              id="editor-first-note"
+              disabled
+              data-startup-control
+              class="button secondary"
+              data-icon="plus"
+            >
+              Создать конспект
+            </button>
+            <div class="editor-tip">
+              <kbd>Ctrl</kbd><span>+</span><kbd>S</kbd
+              ><span>сохранить во время редактирования</span>
+            </div>
+          </div>
+          <div id="note-content" class="note-content hidden"></div>
+        </section>
+      </div>
+    </main>
+    <div
+      id="selection-toolbar"
+      class="selection-toolbar hidden"
+      role="toolbar"
+      aria-label="Действия с выделением"
+    >
+      <button data-selection="link" data-icon="link">Ссылка</button
+      ><button data-selection="create-note" data-icon="plus">Конспект</button
+      ><button data-selection="fact" data-icon="message">Факт</button
+      ><button data-selection="source" data-icon="paperclip">Источник</button>
+    </div>
+    <input id="source-input" type="file" accept="application/pdf,.pdf" hidden />
+    <input
+      id="image-input"
+      type="file"
+      accept="image/png,image/jpeg,image/gif,image/webp,image/avif"
+      hidden
+    />
+    <div id="toast-region" class="toast-region" aria-live="polite"></div>
+    <noscript
+      ><div class="noscript">
+        Для работы Synopsis включите JavaScript в браузере.
+      </div></noscript
+    >
+  </body>
+</html>
