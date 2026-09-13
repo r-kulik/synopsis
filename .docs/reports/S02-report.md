@@ -4,7 +4,7 @@
 
 - Этап: S02 — локальная основа приложения.
 - Владелец: агент основы `/root/s02_foundation`; интеграция остаётся за `/root`.
-- Статус: реализовано и проверено на Windows / CPython 3.14.
+- Статус: принят на Windows / CPython 3.14.
 
 ## Результат
 
@@ -51,3 +51,7 @@ git diff --check
 S03 использует `SynopsisApplication.save_markdown(course_id, note_id, markdown, revision)` и не должен хранить saved Markdown в UI state. S04 использует `snapshot()` и command boundary для Card/Lecture; визуальная карта пока placeholder. S06 может использовать снимки и course-scoped asset bytes, но ZIP import/export, лимиты и архивные diagnostics не входят в S02.
 
 В этом baseline нет полноценного Markdown editor/render, SVG-карты/рёбер, PDF viewer, archive transfer, upload UI, миграций или межпроцессной блокировки. Одновременная запись двумя server processes пока не поддерживается.
+
+## Проверка интегратором
+
+Дата: 2026-09-13. Интегратор воспроизвёл `python -m unittest -v tests/test_contracts.py tests/test_foundation.py` (11/11) и `git diff --check`, сверил границы S01 и S02. Gate S02 принят; ограничения переданы S03/S04/S06.
