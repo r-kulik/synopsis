@@ -1,0 +1,13 @@
+[
+  {"name":"second repeated phrase","raw":"repeat phrase; repeat phrase.","pick":{"text":"repeat phrase","runOccurrence":0,"start":15,"end":28},"href":"synopsis://note/n-2","expected":"repeat phrase; [repeat phrase](synopsis://note/n-2)."},
+  {"name":"unicode cyrillic and emoji","raw":"Вектор 🚀 — направление.","pick":{"text":"Вектор 🚀"},"href":"synopsis://fact/f-1","expected":"[Вектор 🚀](synopsis://fact/f-1) — направление."},
+  {"name":"partial emphasis","raw":"Это **важное понятие** здесь.","pick":{"text":"важное понятие","start":0,"end":6},"href":"synopsis://note/n-3","expected":"Это **[важное](synopsis://note/n-3) понятие** здесь."},
+  {"name":"escaped punctuation","raw":"Скобка \\[ и \\] сохранены.","pick":{"text":"[ и ]"},"href":"synopsis://note/n-4","expected":"Скобка [\\[ и \\]](synopsis://note/n-4) сохранены."},
+  {"name":"table cell","raw":"| Термин | Значение |\n| --- | --- |\n| Вектор | направленный отрезок |","pick":{"text":"направленный отрезок"},"href":"synopsis://note/n-5","expected":"| Термин | Значение |\n| --- | --- |\n| Вектор | [направленный отрезок](synopsis://note/n-5) |"},
+  {"name":"adjacent formula text","raw":"Пусть $x^2$ является квадратом.","pick":{"text":"является квадратом"},"href":"synopsis://note/n-6","expected":"Пусть $x^2$ [является квадратом](synopsis://note/n-6)."},
+  {"name":"existing link refuses","raw":"См. [Матрица](synopsis://note/n-7).","pick":{"text":"Матрица"},"href":"synopsis://fact/f-2","refusal":"unsupported selection context: existing-link"},
+  {"name":"inline formula refuses","raw":"Значение $x^2$ известно.","pick":{"text":"x^2"},"href":"synopsis://note/n-8","refusal":"unsupported selection context: inline-math"},
+  {"name":"fenced code refuses","raw":"```js\nconst value = 1;\n```","pick":{"text":"value"},"href":"synopsis://note/n-9","refusal":"unsupported selection context: fenced-code"},
+  {"name":"display formula refuses","raw":"$$\n\\begin{matrix}a&b\\end{matrix}\n$$","pick":{"text":"matrix"},"href":"synopsis://note/n-10","refusal":"unsupported selection context: display-math"},
+  {"name":"stale revision refuses","raw":"Новый текст.","pick":{"text":"Новый"},"href":"synopsis://note/n-11","actualRevision":8,"refusal":"stale revision"}
+]
