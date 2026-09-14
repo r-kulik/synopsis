@@ -5,6 +5,8 @@ node_modules/
 .ui-test-data/
 test-results/
 .synopsis-data/
+.synopsis-mcp/
+.venv-mcp/
 _storage_smoke/
 *.py[codz]
 *$py.class
@@ -222,3 +224,4 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+output/*

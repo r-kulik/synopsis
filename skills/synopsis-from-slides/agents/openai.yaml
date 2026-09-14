@@ -1,0 +1,10 @@
+interface:
+  display_name: "Synopsis из презентаций"
+  short_description: "Из презентаций — лекции, конспекты и карта знаний"
+  default_prompt: "Используй $synopsis-from-slides: собери из приложенных презентаций курс с лекциями, конспектами и картой для импорта в Synopsis."
+dependencies:
+  tools:
+    - type: "mcp"
+      value: "synopsis"
+      description: "Validated Synopsis draft authoring and archive export"
+      transport: "stdio"

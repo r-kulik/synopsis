@@ -1,0 +1,4 @@
+# Optional authoring MCP only; the normal browser app needs no pip packages.
+# The v1 SDK is pinned deliberately; v2 is a separate API/migration.
+mcp==1.30.0
+pypdf==6.18.1
